@@ -1,0 +1,78 @@
+CREATE TEMP TABLE orders AS
+SELECT 
+  e1.session_id, 
+  e1.article_event_date_time,
+  e1.article_event_date,
+  e1.customer_id,
+  e1.article_id,
+  (
+    SELECT COUNT(*) 
+    FROM articleevents e2 
+    WHERE e2.customer_id = e1.customer_id 
+      AND e2.article_event_type = 10
+      AND e2.article_event_date_time < e1.article_event_date_time
+  ) AS past_purchase,
+  CASE
+    WHEN e1.article_event_type = 10 THEN 1
+    ELSE 0
+  END AS converted,
+  avg_price.avg_price  -- New column for average price
+FROM articleevents e1
+LEFT JOIN (
+  SELECT ae.session_id, AVG(a.current_price) as avg_price
+  FROM articleevents ae
+  JOIN article a ON ae.article_id = a.article_id
+  GROUP BY ae.session_id
+) avg_price ON e1.session_id = avg_price.session_id
+LIMIT 1000;
+
+ALTER TABLE orders
+ADD product_popularity FLOAT;
+
+UPDATE orders
+SET product_popularity = (
+    SELECT CAST(COUNT(article_id) AS FLOAT) / (SELECT COUNT(DISTINCT session_id) FROM articleevents)
+    FROM articleevents a2
+    WHERE a2.article_id = orders.article_id
+)
+
+ALTER TABLE orders
+ADD COLUMN season VARCHAR(20);
+
+UPDATE orders
+SET season = 
+  CASE
+    WHEN EXTRACT(MONTH FROM article_event_date) BETWEEN 3 AND 5 THEN 'Spring'
+    WHEN EXTRACT(MONTH FROM article_event_date) BETWEEN 6 AND 8 THEN 'Summer'
+    WHEN EXTRACT(MONTH FROM article_event_date) BETWEEN 9 AND 11 THEN 'Autumn'
+    ELSE 'Winter'
+  END;
+
+ALTER TABLE orders ADD COLUMN sex VARCHAR(10);
+
+UPDATE orders
+SET sex = customer.sex
+FROM customer
+WHERE orders.customer_id = customer.customer_id;
+
+ALTER TABLE orders ADD COLUMN time_difference_in_minutes INTEGER;
+
+UPDATE orders o
+SET time_difference_in_minutes = (
+    SELECT 
+        EXTRACT(EPOCH FROM (MAX(article_event_date_time::timestamp) - MIN(article_event_date_time::timestamp))) / 60 as time_difference_in_minutes
+    FROM articleevents a
+    WHERE a.session_id = o.session_id
+)
+
+ALTER TABLE orders ADD COLUMN is_weekend INT;
+
+UPDATE orders
+SET is_weekend = 
+    CASE 
+        WHEN EXTRACT(ISODOW FROM article_event_date) IN (6, 7) THEN 1 -- 6 is Saturday, 7 is Sunday
+        ELSE 0
+    END;
+
+SELECT * FROM orders
+LIMIT 100;  
