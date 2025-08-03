@@ -136,7 +136,7 @@ abline(0, 1, col = 'gray',lwd = 2)
 rm(data1)
 rm(xrange)
 rm(corre_data)
-17rm(fit)
+rm(fit)
 data <- data[,-c(21,22)]
 
 # Deal with missings ----
@@ -222,7 +222,7 @@ theme_minimal()
 ggplot(data, aes(x = avg_total_rainfall)) +
 geom_histogram(binwidth = 2, fill = "darkblue", color = "black") +
 labs(title = "Average Rainfall Histogram",
-19x = "AVG Total Rainfall",
+x = "AVG Total Rainfall",
 y = "Frequency") +
 theme_minimal()
 
@@ -266,7 +266,7 @@ labs(x = "Conversion (1=Converted)", y = "Rain (1=Yes)")
 # H3c: Past purchase incidence has a positive influence on the customer journey conversion
 rate.
 CrossTable(data$conversion, data$past_purchase)
-20chisq.test(x = data$conversion, y = data$past_purchase) # S.S.
+chisq.test(x = data$conversion, y = data$past_purchase) # S.S.
 ggplot(data, aes(x = jitter(conversion), y = jitter(past_purchase))) +
 geom_point() +
 labs(x = "Conversion (1=Converted)", y = "Past Purchase Incidence (1=Yes, 2=;)")
@@ -351,7 +351,7 @@ scale_y_continuous(expand = c(0.0005, 0), breaks = seq(0, 40, 5), limits = c(0, 
 #or
 
 # Creating temperature groups with labels
-22data$temperature_group <- cut(data$temp, breaks = c(-Inf, 10, 20, 30, Inf), labels = c("< 10ºC",
+data$temperature_group <- cut(data$temp, breaks = c(-Inf, 10, 20, 30, Inf), labels = c("< 10ºC",
 "11ºC - 20ºC", "21ºC - 30ºC", "31ºC >"))
 
 # Plot the results.
@@ -398,4 +398,5 @@ coord_flip() +
 theme(legend.position = "bottom") +
 expand_limits(y = c(0, 20)) +
 labs(fill = "Past Purchase Incidence")
+
 
