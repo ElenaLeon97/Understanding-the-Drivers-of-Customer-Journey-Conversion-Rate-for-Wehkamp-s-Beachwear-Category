@@ -10,7 +10,7 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 library(reshape2)
-14library(car)
+library(car)
 library(gmodels)
 library(ggplot2)
 library(RColorBrewer)
@@ -398,3 +398,4 @@ coord_flip() +
 theme(legend.position = "bottom") +
 expand_limits(y = c(0, 20)) +
 labs(fill = "Past Purchase Incidence")
+
